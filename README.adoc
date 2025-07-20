@@ -1,0 +1,151 @@
+= Doxygen documentation
+In CMake, you're able to use the Doxygen documentation, that means, you'll have the possibility to comment using doxygen syntax and use your CMake to create your doc
+
+:toc:
+:sectnums:
+
+== Introduction
+As you can see, if you take a look at the library, you'll see the following useless `print_hello_world`:
+
+```cpp
+void print_hello_world() {
+    std::cout << "JSON Lib version: "
+              << NLOHMANN_JSON_VERSION_MAJOR << "."
+              << NLOHMANN_JSON_VERSION_MINOR << "."
+              << NLOHMANN_JSON_VERSION_PATCH << std::endl;
+
+    std::cout << "FMT version: "
+              << FMT_VERSION << std::endl;
+
+    std::cout << "CXXOPTS version: "
+              << CXXOPTS__VERSION_MAJOR << "."
+              << CXXOPTS__VERSION_MINOR << "."
+              << CXXOPTS__VERSION_PATCH << std::endl;
+
+    std::cout << "SPDLOG version: "
+              << SPDLOG_VER_MAJOR << "."
+              << SPDLOG_VER_MINOR << "."
+              << SPDLOG_VER_PATCH << std::endl;
+}
+```
+
+Not a real function very usefull inside of a library, however, even if it's pretty useless, we can document it through doxygen comment like the following:
+
+```cpp
+/**
+ * @brief Print out version and Hello World !
+ * @return nothing
+ */
+void print_hello_world() {
+    std::cout << "JSON Lib version: "
+              << NLOHMANN_JSON_VERSION_MAJOR << "."
+              << NLOHMANN_JSON_VERSION_MINOR << "."
+              << NLOHMANN_JSON_VERSION_PATCH << std::endl;
+
+    std::cout << "FMT version: "
+              << FMT_VERSION << std::endl;
+
+    std::cout << "CXXOPTS version: "
+              << CXXOPTS__VERSION_MAJOR << "."
+              << CXXOPTS__VERSION_MINOR << "."
+              << CXXOPTS__VERSION_PATCH << std::endl;
+
+    std::cout << "SPDLOG version: "
+              << SPDLOG_VER_MAJOR << "."
+              << SPDLOG_VER_MINOR << "."
+              << SPDLOG_VER_PATCH << std::endl;
+}
+```
+
+NOTE: As you can see, the comment is pretty useless, however you can see that this comment contains some doxygen keyword, using the doxygen inside of CMake, we'll be able to generate the documentation.
+
+== Installing doxygen
+In order to use Doxygen inside of the CMake, you'll need to have link:https://doxygen.nl/[Doxygen] installed on your machine.
+
+Once you've it installed on your machine, if you type the following command:
+```bash
+$ doxygen
+```
+An output showing a help should be displayed, and you'll be able to make a custom CMake target for you to use doxygen on your code.
+
+== Use Doxygen
+So the first thing that is needed to use Doxygen in your project, more than only the comment, you'll need to generate a configuration file using the following command:
+
+```bash
+$ doxygen -g
+```
+
+This command should generate a file named `Doxyfile` that is the configuration of the doxygen of your project.
+
+=== Configuring Doxyfile
+Once you create the `Doxyfile` through `$ doxygen -g` command line, you can now, edit the `Doxyfile` and change its content to the following:
+
+```doxygen
+# Configuration for Doxygen for use with CMake
+# Only options that deviate from the default are included
+# To create a new Doxyfile containing all available options, call "doxygen"
+
+DOXYFILE_ENCODING           = UTF-8
+PROJECT_NAME                = "C++ project template"
+PROJECT_NUMBER              = 1.0
+PROJECT_BRIEF               =
+PROJECT_LOGO                =
+OUTPUT_DIRECTORY            = ./
+OUTPUT_LANGUAGE             = English
+MARKDOWN_SUPPORT            = YES
+
+# ------------------------------------------------------------------------------------
+# Build related configuration options
+# ------------------------------------------------------------------------------------
+EXTRACT_ALL                 = YES
+RECURSIVE                   = YES
+GENERATE_HTML               = YES
+GENERATE_LATEX              = NO
+
+# ------------------------------------------------------------------------------------
+# Configuration options related to the input files
+# ------------------------------------------------------------------------------------
+INPUT                       = ../app/src/ \
+INPUT                       = ../app/include/ \
+INPUT                       = ../my_lib/src/ \
+INPUT                       = ../my_lib/include/
+INPUT_ENCODING              = UTF-8
+FILE_PATTERNS               = *.c \
+                              *.cc \
+                              *.cpp \
+                              *.c++ \
+                              *.h \
+                              *.hpp \
+                              *.h++ \
+                              *.md \
+                              *.adoc \
+                              *.doc
+
+```
+=== Running doxygen
+Once you've edited the `Doxyfile`, you'll be able to run the doxygen command again without any argument like so:
+
+```bash
+$ doxygen
+```
+
+According to the `OUTPUT_DIRECTORY` from the `Doxyfile` above, a folder named `html` should be created inside of where your `doxygen` file is.
+
+=== Using CMake
+Now that you are able to generate the documentation of your code based on the comment you wrote, on it, you need a way to generate the documentation using your `CMake` in order to have everything correctly set up.
+
+== Create custom CMake target
+A way to have a new target that isn't present by default in CMake is by making use of the custom target named `add_custom_target` command.
+
+But still, you should be able to find the Doxygen package from the CMake using the following script:
+
+```cmake
+find_package(DOXYGEN)
+
+if (DOXYGEN_FOUND)
+    add_custom_target()
+endif()
+```
+
+=== link:https://cmake.org/cmake/help/latest/command/add_custom_target.html[add_custom_target]
+This command adds a custom target with the given name passed as parameter that executes the given commands passed as parameter also. The target has no output file and is _always considered out of date_ even if the commands try to create a file with the name of the target. Use the link:https://cmake.org/cmake/help/latest/command/add_custom_command.html#command:add_custom_command[`add_custom_command()`] command to generate a file with dependencies. By default nothing depends on the custom target. Use the link:https://cmake.org/cmake/help/latest/command/add_dependencies.html#command:add_dependencies[add_dependencies] command to add dependencies of from other targets.
